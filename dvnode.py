@@ -33,12 +33,13 @@ class Node:
         self.predecessors = [None for _ in range(NUM_NODES)]
 
         # TODO: complete this method
-        self.dist_table[nodeid] = self.simulator.cost[nodeid]
+        self.dist_table[nodeid] = copy.copy(self.simulator.cost[nodeid])
+
         for i in range(NUM_NODES):
-            if i!=nodeid and self.simulator.cost[nodeid][i] != inf:
+            if i != nodeid and self.simulator.cost[nodeid][i] != inf:
                 self.simulator.to_link_layer(Packet(nodeid, i, self.dist_table[nodeid]))
                 self.predecessors[i] = i
-
+        print("hi", self.dist_table)
 
     def get_link_cost(self, other):
         '''
@@ -74,12 +75,23 @@ class Node:
         '''
         src = pkt.get_src()
         vector = pkt.get_dist_vector()
+        changed = 0
 
-        for i in range(NUM_NODES):
-            if self.get_dist_vector()[src] + vector[i] < self.get_dist_vector()[i] and self.nodeid != i and self.get_link_cost(i) != inf:
-                self.get_dist_vector()[i] = self.get_dist_vector()[src] + vector[i]
-                self.predecessors[i] = src
-                self.simulator.to_link_layer(Packet(self.nodeid, i, self.get_dist_vector()))
+        if self.dist_table[src] != vector:
+            self.dist_table[src] = vector
+            for target in range(NUM_NODES):
+                for i in range(NUM_NODES):
+                    if self.dist_table[self.nodeid][i] + self.dist_table[i][target] < \
+                            self.dist_table[self.nodeid][target]:
+
+                        self.dist_table[self.nodeid][target] = \
+                            self.dist_table[self.nodeid][i] + self.dist_table[i][target]
+                        self.predecessors[target] = self.predecessors[i]
+                        changed = 1
+            if changed == 1:
+                for i in range(NUM_NODES):
+                    if i != self.nodeid and self.simulator.cost[self.nodeid][i] != inf:
+                        self.simulator.to_link_layer(Packet(self.nodeid, i, self.dist_table[self.nodeid]))
 
     def link_cost_change_handler(self, which_link: int, new_cost: int):
         '''
@@ -88,23 +100,21 @@ class Node:
         information that is stored at this node, and notify the neighbours if
         necessary.
         '''
-
         old_cost = self.dist_table[self.nodeid][which_link]
-        changed = 0
-        if old_cost != new_cost:
+
+        if new_cost < old_cost:
             self.dist_table[self.nodeid][which_link] = new_cost
+            self.predecessors[which_link] = which_link
             for target in range(NUM_NODES):
                 for i in range(NUM_NODES):
-                    if self.dist_table[self.nodeid][i]+self.dist_table[i][target] < \
+                    if self.dist_table[self.nodeid][i] + self.dist_table[i][target] < \
                             self.dist_table[self.nodeid][target]:
                         self.dist_table[self.nodeid][target] = \
-                            self.dist_table[self.nodeid][i]+self.dist_table[i][target]
-                        self.predecessors[target] = i
-                        changed = 1
-            if changed == 1:
-                for i in range(NUM_NODES):
-                    if self.simulator.cost[self.nodeid][i] != 0 and self.simulator.cost[self.nodeid][i] != inf:
-                        self.simulator.to_link_layer(Packet(self.nodeid, i, self.dist_table))
+                            self.dist_table[self.nodeid][i] + self.dist_table[i][target]
+                        self.predecessors[target] = self.predecessors[i]
+            for i in range(NUM_NODES):
+                if i != self.nodeid and self.simulator.cost[self.nodeid][i] != inf:
+                    self.simulator.to_link_layer(Packet(self.nodeid, i, self.dist_table[self.nodeid]))
 
 
     def print_dist_table(self):
