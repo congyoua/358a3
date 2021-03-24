@@ -6,7 +6,7 @@ from dvnode import *
 
 # the number of nodes in the network
 # modify it when you test different graph sizes
-NUM_NODES = 5
+NUM_NODES = 4
 
 # event types
 EVT_FROM_LINK_LAYER = 0
@@ -167,8 +167,8 @@ class Simulator:
         Make sure the size of this graph matches NUM_NODES
         '''
         self.cost = [
-                      [0,   4,   50], 
-                      [4,   0,   1], 
+                      [0,   4,   50],
+                      [4,   0,   1],
                       [50,  1,   0]
                     ]
         return
