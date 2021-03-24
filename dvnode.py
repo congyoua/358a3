@@ -76,7 +76,7 @@ class Node:
         vector = pkt.get_dist_vector()
 
         for i in range(NUM_NODES):
-            if self.get_dist_vector()[src] + vector[i] < self.get_dist_vector()[i] and self.nodeid != i and src != i:
+            if self.get_dist_vector()[src] + vector[i] < self.get_dist_vector()[i] and self.nodeid != i and self.get_link_cost(i) != inf:
                 self.get_dist_vector()[i] = self.get_dist_vector()[src] + vector[i]
                 self.predecessors[i] = src
                 self.simulator.to_link_layer(Packet(self.nodeid, i, self.get_dist_vector()))
