@@ -6,7 +6,7 @@ from dvnode import *
 
 # the number of nodes in the network
 # modify it when you test different graph sizes
-NUM_NODES = 3
+NUM_NODES = 5
 
 # event types
 EVT_FROM_LINK_LAYER = 0
@@ -149,8 +149,8 @@ class Simulator:
         # uncomment one of the following two lines to generate the graph,
         # manually or randomly
         # this method will populate self.cost
-        self.generate_topology()
-        #self.generate_random_topology()
+        # self.generate_topology()
+        self.generate_random_topology()
 
         # creating the nodes of in the graph
         # calling the __init__ method of the Node class

@@ -35,8 +35,8 @@ class Node:
         # TODO: complete this method
         self.dist_table[nodeid] = self.simulator.cost[nodeid]
         for i in range(NUM_NODES):
-            if self.simulator.cost[nodeid][i] != 0:
-                self.simulator.to_link_layer(Packet(nodeid, i, self.dist_table))
+            if i!=nodeid and self.simulator.cost[nodeid][i] != inf:
+                self.simulator.to_link_layer(Packet(nodeid, i, self.dist_table[nodeid]))
                 self.predecessors[i] = i
 
     def get_link_cost(self, other):
@@ -71,9 +71,14 @@ class Node:
         packet correctly. Read dvsim.py for more details about the potential
         errors.
         '''
+        src = pkt.get_src()
+        vector = pkt.get_dist_vector()
 
-        # TODO: implement this method
-        pass
+        for i in range(NUM_NODES):
+            if self.get_dist_vector()[src] + vector[i] < self.get_dist_vector()[i] and self.nodeid != i and src != i:
+                self.get_dist_vector()[i] = self.get_dist_vector()[src] + vector[i]
+                self.predecessors[i] = src
+                self.simulator.to_link_layer(Packet(self.nodeid, i, self.get_dist_vector()))
 
     def link_cost_change_handler(self, which_link: int, new_cost: int):
         '''
