@@ -39,6 +39,7 @@ class Node:
                 self.simulator.to_link_layer(Packet(nodeid, i, self.dist_table))
                 self.predecessors[i] = i
 
+
     def get_link_cost(self, other):
         '''
         Get the cost of the link between this node and other.
@@ -83,8 +84,23 @@ class Node:
         necessary.
         '''
 
-        # TODO: implement this method
-        pass
+        old_cost = self.dist_table[self.nodeid][which_link]
+        changed = 0
+        if old_cost != new_cost:
+            self.dist_table[self.nodeid][which_link] = new_cost
+            for target in range(NUM_NODES):
+                for i in range(NUM_NODES):
+                    if self.dist_table[self.nodeid][i]+self.dist_table[i][target] < \
+                            self.dist_table[self.nodeid][target]:
+                        self.dist_table[self.nodeid][target] = \
+                            self.dist_table[self.nodeid][i]+self.dist_table[i][target]
+                        self.predecessors[target] = i;
+                        changed = 1
+            if changed == 1:
+                for i in range(NUM_NODES):
+                    if self.simulator.cost[self.nodeid][i] != 0 && self.simulator.cost[self.nodeid][i] != inf:
+                        self.simulator.to_link_layer(Packet(self.nodeid, i, self.dist_table))
+
 
     def print_dist_table(self):
         '''
