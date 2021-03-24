@@ -33,7 +33,11 @@ class Node:
         self.predecessors = [None for _ in range(NUM_NODES)]
 
         # TODO: complete this method
-        pass
+        self.dist_table[nodeid] = self.simulator.cost[nodeid]
+        for i in range(NUM_NODES):
+            if self.simulator.cost[nodeid][i] != 0:
+                self.simulator.to_link_layer(Packet(nodeid, i, self.dist_table))
+                self.predecessors[i] = i
 
     def get_link_cost(self, other):
         '''
