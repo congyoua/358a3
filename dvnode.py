@@ -94,7 +94,7 @@ class Node:
                             self.dist_table[self.nodeid][target]:
                         self.dist_table[self.nodeid][target] = \
                             self.dist_table[self.nodeid][i]+self.dist_table[i][target]
-                        self.predecessors[target] = i;
+                        self.predecessors[target] = i
                         changed = 1
             if changed == 1:
                 for i in range(NUM_NODES):
