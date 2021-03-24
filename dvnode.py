@@ -35,7 +35,7 @@ class Node:
         # TODO: complete this method
         self.dist_table[nodeid] = self.simulator.cost[nodeid]
         for i in range(NUM_NODES):
-            if self.simulator.cost[nodeid][i] != 0:
+            if self.simulator.cost[nodeid][i] != 0 and self.simulator.cost[nodeid][i] != inf:
                 self.simulator.to_link_layer(Packet(nodeid, i, self.dist_table))
                 self.predecessors[i] = i
 
@@ -98,7 +98,7 @@ class Node:
                         changed = 1
             if changed == 1:
                 for i in range(NUM_NODES):
-                    if self.simulator.cost[self.nodeid][i] != 0 && self.simulator.cost[self.nodeid][i] != inf:
+                    if self.simulator.cost[self.nodeid][i] != 0 and self.simulator.cost[self.nodeid][i] != inf:
                         self.simulator.to_link_layer(Packet(self.nodeid, i, self.dist_table))
 
 
