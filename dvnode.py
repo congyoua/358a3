@@ -76,9 +76,11 @@ class Node:
         vector = pkt.get_dist_vector()
         changed = False
 
+        # Check if the upcoming DV is a new one
         if self.dist_table[src] == vector:
             return
 
+        # Update the local DV with the new DV
         self.dist_table[src] = vector
         for i in range(NUM_NODES):
             if self.get_dist_vector()[src] + vector[i] < self.get_dist_vector()[i] and self.nodeid != i and src != i:
@@ -86,14 +88,14 @@ class Node:
                 self.predecessors[i] = self.predecessors[src]
                 changed = True
 
+        # Check if the local DV was updated
         if not changed:
             return
 
+        # Notify all the neighbors and send them the updated local DV
         for i in range(NUM_NODES):
             if i != self.nodeid and self.get_link_cost(i) != inf:
                 self.simulator.to_link_layer(Packet(self.nodeid, i, self.get_dist_vector()))
-
-
 
 
     def link_cost_change_handler(self, which_link: int, new_cost: int):
@@ -104,15 +106,19 @@ class Node:
         necessary.
         '''
         affected = False
+
+        # Update local DV with the new cost
         self.get_dist_vector()[which_link] = new_cost
+        # Check if the affected link is in any shortest paths
         for i in range(NUM_NODES):
             if self.get_predecessor(i) == which_link:
                 affected = True
 
+        # Return if the affected link has no impact on any shortest paths
         if not affected:
             return
 
-        print("change")
+        # Notify all the neighbors and send them the updated local DV
         for i in range(NUM_NODES):
             if i != self.nodeid and self.get_link_cost(i) != inf:
                 self.simulator.to_link_layer(Packet(self.nodeid, i, self.get_dist_vector()))

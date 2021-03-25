@@ -6,7 +6,7 @@ from dvnode import *
 
 # the number of nodes in the network
 # modify it when you test different graph sizes
-NUM_NODES = 4
+NUM_NODES = 5
 
 # event types
 EVT_FROM_LINK_LAYER = 0
