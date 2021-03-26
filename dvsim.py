@@ -6,7 +6,7 @@ from dvnode import *
 
 # the number of nodes in the network
 # modify it when you test different graph sizes
-NUM_NODES = 5
+NUM_NODES = 6
 
 # event types
 EVT_FROM_LINK_LAYER = 0
@@ -191,8 +191,8 @@ class Simulator:
         You may modify this method to test different link-change events.
         '''
         nodea = 0
-        nodeb = 1
-        new_cost = 2
+        nodeb = 2
+        new_cost = 60
         if self.clocktime > 10001.0:
             new_cost = 8   # use different new_cost depending on its time
 
