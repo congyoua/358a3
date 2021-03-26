@@ -33,7 +33,7 @@ class Node:
         self.predecessors = [None for _ in range(NUM_NODES)]
 
         # TODO: complete this method
-        self.dist_table[nodeid] = copy.copy(self.simulator.cost[nodeid])
+        self.dist_table[nodeid] = self.simulator.cost[nodeid].copy()
 
         for i in range(NUM_NODES):
             if i != nodeid and self.simulator.cost[nodeid][i] != inf:
@@ -72,30 +72,17 @@ class Node:
         packet correctly. Read dvsim.py for more details about the potential
         errors.
         '''
+        # Decompose the packet
         src = pkt.get_src()
         vector = pkt.get_dist_vector()
-        changed = False
 
         # Check if the upcoming DV is a new one
         if self.dist_table[src] == vector:
             return
 
         # Update the local DV with the new DV
-        self.dist_table[src] = vector
-        for i in range(NUM_NODES):
-            if self.get_dist_vector()[src] + vector[i] < self.get_dist_vector()[i] and self.nodeid != i and src != i:
-                self.get_dist_vector()[i] = self.get_dist_vector()[src] + vector[i]
-                self.predecessors[i] = self.predecessors[src]
-                changed = True
-
-        # Check if the local DV was updated
-        if not changed:
-            return
-
-        # Notify all the neighbors and send them the updated local DV
-        for i in range(NUM_NODES):
-            if i != self.nodeid and self.get_link_cost(i) != inf:
-                self.simulator.to_link_layer(Packet(self.nodeid, i, self.get_dist_vector()))
+        self.dist_table[src] = vector.copy()
+        self.update_helper()
 
 
     def link_cost_change_handler(self, which_link: int, new_cost: int):
@@ -105,17 +92,31 @@ class Node:
         information that is stored at this node, and notify the neighbours if
         necessary.
         '''
-        affected = False
 
-        # Update local DV with the new cost
-        self.get_dist_vector()[which_link] = new_cost
-        # Check if the affected link is in any shortest paths
-        for i in range(NUM_NODES):
-            if self.get_predecessor(i) == which_link:
-                affected = True
+        self.update_helper()
 
-        # Return if the affected link has no impact on any shortest paths
-        if not affected:
+    def update_helper(self):
+        '''
+        Update the distance vector
+        '''
+        # Make a copy of the old DV
+        temp = self.get_dist_vector().copy()
+        # Iterate through all the destination node
+        for dest in range(NUM_NODES):
+            # Ignore the node itself
+            if dest == self.nodeid:
+                continue
+            # Set cost to inf first
+            self.get_dist_vector()[dest] = inf
+            # Iterate through all the neighbors, non-neighbors have no effect since the link_cost is inf
+            for v in range(NUM_NODES):
+                new_cost = self.get_link_cost(v) + self.dist_table[v][dest]
+                if new_cost < self.get_dist_vector()[dest]:
+                    self.get_dist_vector()[dest] = new_cost
+                    self.predecessors[dest] = v
+
+        # Check if the local DV was updated
+        if temp == self.get_dist_vector():
             return
 
         # Notify all the neighbors and send them the updated local DV
@@ -123,21 +124,6 @@ class Node:
             if i != self.nodeid and self.get_link_cost(i) != inf:
                 self.simulator.to_link_layer(Packet(self.nodeid, i, self.get_dist_vector()))
 
-        '''
-        if new_cost < old_cost:
-            self.dist_table[self.nodeid][which_link] = new_cost
-            self.predecessors[which_link] = which_link
-            for target in range(NUM_NODES):
-                for i in range(NUM_NODES):
-                    if self.dist_table[self.nodeid][i] + self.dist_table[i][target] < \
-                            self.dist_table[self.nodeid][target]:
-                        self.dist_table[self.nodeid][target] = \
-                            self.dist_table[self.nodeid][i] + self.dist_table[i][target]
-                        self.predecessors[target] = self.predecessors[i]
-            for i in range(NUM_NODES):
-                if i != self.nodeid and self.simulator.cost[self.nodeid][i] != inf:
-                    self.simulator.to_link_layer(Packet(self.nodeid, i, self.dist_table[self.nodeid]))
-        '''
 
     def print_dist_table(self):
         '''
