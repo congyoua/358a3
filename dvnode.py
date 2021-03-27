@@ -32,9 +32,10 @@ class Node:
         # throughout the algorithm's execution
         self.predecessors = [None for _ in range(NUM_NODES)]
 
-        # TODO: complete this method
+        # Copy the DV down to the dist_table
         self.dist_table[nodeid] = self.simulator.cost[nodeid].copy()
 
+        # Send its DV to all its neighbors and update predecessors
         for i in range(NUM_NODES):
             if i != nodeid and self.simulator.cost[nodeid][i] != inf:
                 self.simulator.to_link_layer(Packet(nodeid, i, self.dist_table[nodeid]))
